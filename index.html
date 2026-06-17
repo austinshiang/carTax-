@@ -39,7 +39,7 @@
           </svg>
           台灣汽機車過戶/停牌稅金拆帳計算機
         </h1>
-        <p class="text-slate-500 mt-1"></p>
+        <p class="text-slate-500 mt-1">按日精準分攤 雙軌實務計算。</p>
       </div>
     </header>
 
@@ -162,7 +162,7 @@
           <div class="grid grid-cols-2 gap-3 mt-1">
             <label class="flex items-center justify-center gap-2 p-2.5 border rounded-lg bg-white hover:bg-slate-50 cursor-pointer border-brand-500 ring-2 ring-brand-500/10" id="labelPaySeller">
               <input type="radio" name="counterPayer" value="seller" checked class="w-3.5 h-3.5 text-brand-600 focus:ring-brand-500 border-slate-300" onclick="setCounterPayer('seller')">
-              <span class="text-xs font-semibold text-slate-800">舊車主支付 </span>
+              <span class="text-xs font-semibold text-slate-800">舊車主支付</span>
             </label>
             <label class="flex items-center justify-center gap-2 p-2.5 border rounded-lg bg-white hover:bg-slate-50 cursor-pointer border-slate-200" id="labelPayBuyer">
               <input type="radio" name="counterPayer" value="buyer" class="w-3.5 h-3.5 text-brand-600 focus:ring-brand-500 border-slate-300" onclick="setCounterPayer('buyer')">
@@ -462,7 +462,7 @@
         { license: 2700, fuelGas: 4800, fuelDiesel: 2880, label: "1201 ~ 1800 c.c." },
         { license: 3600, fuelGas: 7710, fuelDiesel: 4626, label: "1801 ~ 2400 c.c." },
         { license: 4500, fuelGas: 9900, fuelDiesel: 5940, label: "2401 ~ 3000 c.c." },
-        { license: 5400, fuelGas: 11880, fuelDiesel: 7128, label: "3001 ~ 3600 c.c. " },
+        { license: 5400, fuelGas: 11880, fuelDiesel: 7128, label: "3001 ~ 3600 c.c." },
         { license: 6300, fuelGas: 13500, fuelDiesel: 8100, label: "3601 ~ 4200 c.c." },
         { license: 7200, fuelGas: 15420, fuelDiesel: 9252, label: "4201 ~ 4800 c.c." },
         { license: 8100, fuelGas: 16740, fuelDiesel: 10044, label: "4801 ~ 5400 c.c." },
@@ -1008,7 +1008,7 @@
 👉 ${netSuspensionDiff > 0 ? `【政府退稅】政府應向車主退還溢繳稅金：NT$ ${formatMoney(netSuspensionDiff)} 元` : `【櫃檯補繳】車主臨櫃應向政府補繳稅金：NT$ ${formatMoney(Math.abs(netSuspensionDiff))} 元`}
 ----------------------------------
 * 車主可持監理所開立之「停牌/報廢證明書」與「退稅申請書」向稅捐處及監理所辦理溢繳天數退稅。
-;
+`;
       }
 
       document.getElementById('outputSummary').value = shareText;
