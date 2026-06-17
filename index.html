@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="h-full bg-slate-50">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>台灣汽機車過戶稅金拆帳計算機</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0fdf4',
+              100: '#dcfce7',
+              500: '#10b981',
+              600: '#059669',
+              700: '#047857',
+              900: '#064e3b',
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="h-full text-slate-800 antialiased flex flex-col justify-between">
+
+  <!-- Main Container -->
+  <main class="max-w-6xl mx-auto px-4 py-8 w-full flex-grow">
+    
+    <!-- Header -->
+    <header class="mb-8 text-center md:text-left flex flex-col md:flex-row items-center justify-between gap-4 border-b border-slate-200 pb-6">
+      <div>
+        <h1 class="text-3xl font-bold text-slate-900 tracking-tight flex items-center justify-center md:justify-start gap-2">
+          <svg class="w-8 h-8 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+          </svg>
+          台灣汽機車過戶/停牌稅金拆帳計算機
+        </h1>
+        <p class="text-slate-500 mt-1"></p>
+      </div>
+    </header>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      
+      <!-- Left Column: Input Panel -->
+      <section class="lg:col-span-5 bg-white rounded-2xl shadow-sm border border-slate-200/80 p-6 flex flex-col gap-6">
+        <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-3">
+          <svg class="w-5 h-5 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
+          </svg>
+          條件設定
+        </h2>
+
+        <!-- 0. 辦理業務目的選擇 (過戶 vs 停牌) -->
+        <div>
+          <label class="block text-sm font-semibold text-slate-700 mb-2">辦理業務類型</label>
+          <div class="grid grid-cols-2 gap-3">
+            <button id="purposeTransfer" class="py-2.5 px-4 border rounded-xl flex flex-col items-center justify-center transition-all bg-brand-50 border-brand-500 text-brand-900 ring-2 ring-brand-500/15" onclick="setPurpose('transfer')">
+              <span class="text-sm font-bold">過戶 (新舊車主拆帳)</span>
+              <span class="text-[10px] text-brand-700 mt-0.5">新舊車主按天數私下退補</span>
+            </button>
+            <button id="purposeSuspension" class="py-2.5 px-4 border border-slate-200 rounded-xl flex flex-col items-center justify-center transition-all hover:bg-slate-50 text-slate-700" onclick="setPurpose('suspension')">
+              <span class="text-sm font-bold">停牌/報廢 (政府退補)</span>
+              <span class="text-[10px] text-slate-500 mt-0.5">車主與監理處/稅捐處結算</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 1. 種類選擇 -->
+        <div>
+          <label class="block text-sm font-semibold text-slate-700 mb-2">車輛種類</label>
+          <div class="grid grid-cols-2 gap-3">
+            <button id="typePassenger" class="py-3 px-4 border border-slate-200 rounded-xl flex flex-col items-center gap-1 transition-all hover:bg-slate-50 text-slate-700" onclick="setVehicleType('passenger')">
+              <svg class="w-6 h-6 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+              </svg>
+              <span class="text-sm font-medium">自用小客車</span>
+            </button>
+            <button id="typeCargo" class="py-3 px-4 border rounded-xl flex flex-col items-center gap-1 transition-all bg-brand-50 border-brand-500 text-brand-900 ring-2 ring-brand-500/15" onclick="setVehicleType('cargo')">
+              <svg class="w-6 h-6 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h8a1 1 0 001-1zM13 16h8a1 1 0 001-1v-4l-3-3h-6"></path>
+              </svg>
+              <span class="text-sm font-medium">自用小貨車</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 2. 排氣量與燃料 -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label for="selectCc" class="block text-sm font-semibold text-slate-700 mb-1.5">排氣量級距 (c.c.)</label>
+            <select id="selectCc" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all text-sm font-medium text-slate-850">
+              <!-- Dynamically populated -->
+            </select>
+          </div>
+
+          <div>
+            <label for="selectFuel" class="block text-sm font-semibold text-slate-700 mb-1.5">燃料種類</label>
+            <select id="selectFuel" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all text-sm font-medium">
+              <option value="gas">汽油</option>
+              <option value="diesel">柴油</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- 3. 自訂年度稅額 -->
+        <div class="bg-amber-50/50 rounded-xl border border-amber-200/60 p-4 flex flex-col gap-3">
+          <div class="flex justify-between items-center border-b border-amber-200/40 pb-2">
+            <span class="text-xs font-bold text-amber-900 tracking-wide flex items-center gap-1">
+              <svg class="w-4 h-4 text-amber-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+              </svg>
+              確認或微調年額 (支援直接修改)
+            </span>
+            <span class="text-[10px] bg-amber-100/80 text-amber-800 px-2 py-0.5 rounded font-medium">可編輯</span>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label for="inputAnnualLicense" class="block text-xs font-semibold text-amber-800 mb-1">年度牌照稅額 (元)</label>
+              <input type="number" id="inputAnnualLicense" class="w-full bg-white border border-amber-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all text-sm font-bold text-slate-900" min="0">
+            </div>
+            <div>
+              <label for="inputAnnualFuel" class="block text-xs font-semibold text-amber-800 mb-1">年度燃料稅額 (元)</label>
+              <input type="number" id="inputAnnualFuel" class="w-full bg-white border border-amber-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all text-sm font-bold text-slate-900" min="0">
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. 全額繳納狀況 -->
+        <div>
+          <label class="block text-sm font-semibold text-slate-700 mb-2">過戶前已繳清狀況 (稅單開徵已繳)</label>
+          <div class="space-y-3">
+            <label class="flex items-center gap-3 p-3 border border-slate-100 rounded-xl bg-slate-50 hover:bg-slate-100/70 transition-colors cursor-pointer">
+              <input type="checkbox" id="checkLicensePaid" class="w-4 h-4 rounded text-brand-600 focus:ring-brand-500 border-slate-300">
+              <div class="flex-grow">
+                <span class="text-sm font-semibold text-slate-800">牌照稅今年度「已先繳清」</span>
+                <p class="text-xs text-slate-500">若勾選，代表舊車主之前（如4月）已主動繳納。</p>
+              </div>
+            </label>
+            <label class="flex items-center gap-3 p-3 border border-slate-100 rounded-xl bg-slate-50 hover:bg-slate-100/70 transition-colors cursor-pointer">
+              <input type="checkbox" id="checkFuelPaid" class="w-4 h-4 rounded text-brand-600 focus:ring-brand-500 border-slate-300" checked>
+              <div class="flex-grow">
+                <span class="text-sm font-semibold text-slate-800">燃料稅今年度「已先繳清」</span>
+                <p class="text-xs text-slate-500">若勾選，代表舊車主之前已繳清（如您今年4月已全清）。</p>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- 4.5 現場誰付錢 (過戶用，停牌時隱藏) -->
+        <div id="counterPayerSection" class="bg-slate-50 p-4 rounded-xl border border-slate-200/60">
+          <label class="block text-sm font-semibold text-slate-700 mb-2 flex items-center gap-1">
+            <svg class="w-4 h-4 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
+            </svg>
+            過戶當日：未繳稅金在監理所櫃檯由誰付？
+          </label>
+          <div class="grid grid-cols-2 gap-3 mt-1">
+            <label class="flex items-center justify-center gap-2 p-2.5 border rounded-lg bg-white hover:bg-slate-50 cursor-pointer border-brand-500 ring-2 ring-brand-500/10" id="labelPaySeller">
+              <input type="radio" name="counterPayer" value="seller" checked class="w-3.5 h-3.5 text-brand-600 focus:ring-brand-500 border-slate-300" onclick="setCounterPayer('seller')">
+              <span class="text-xs font-semibold text-slate-800">舊車主支付 </span>
+            </label>
+            <label class="flex items-center justify-center gap-2 p-2.5 border rounded-lg bg-white hover:bg-slate-50 cursor-pointer border-slate-200" id="labelPayBuyer">
+              <input type="radio" name="counterPayer" value="buyer" class="w-3.5 h-3.5 text-brand-600 focus:ring-brand-500 border-slate-300" onclick="setCounterPayer('buyer')">
+              <span class="text-xs font-semibold text-slate-800">新車主現場支付</span>
+            </label>
+          </div>
+          <p class="text-[10px] text-slate-400 mt-2">
+            * 只要過戶，監理站會現場強制將未繳稅額補清。此選項會直接影響雙方的私下應收應退現金流。
+          </p>
+        </div>
+
+        <!-- 5. 切分日期 -->
+        <div>
+          <label for="inputDate" class="block text-sm font-semibold text-slate-700 mb-1.5" id="dateLabelText">過戶切分日期 (雙方交車日)</label>
+          <div class="relative">
+            <input type="date" id="inputDate" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all text-sm font-medium">
+          </div>
+          <p class="text-xs text-slate-500 mt-2" id="dateExplainText">
+            * 依照法規，**過戶當日**的稅費計在**舊車主**身上。
+          </p>
+        </div>
+
+      </section>
+
+      <!-- Right Column: Results & Analytics -->
+      <section class="lg:col-span-7 flex flex-col gap-6">
+        
+        <!-- Step-by-Step Settlement Card -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-6 flex flex-col gap-6">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+            <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2" id="mainCardTitle">
+              <span class="w-2 h-6 bg-brand-600 rounded"></span>
+              過戶稅費按日退補精密算理
+            </h3>
+            <span class="text-xs bg-slate-100 text-slate-600 px-3 py-1 rounded-full font-medium" id="badgeYear">2026年</span>
+          </div>
+
+          <!-- Step 1: Fair Share Base -->
+          <div>
+            <div class="flex items-center gap-2 text-sm font-bold text-slate-800 mb-2" id="step1Title">
+              <span class="w-5 h-5 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center text-xs font-mono">1</span>
+              第一步：新舊車主按日應負擔比例
+            </div>
+            
+            <!-- Step 1 For Ownership Transfer -->
+            <div id="step1TransferBox" class="grid grid-cols-2 gap-4 text-xs bg-slate-50 p-4 rounded-xl">
+              <div>
+                <span class="text-emerald-700 font-bold block">舊車主理應自付 (共 <span id="sellerDaysVal">--</span> 天)</span>
+                <div class="text-slate-900 font-medium text-sm mt-1 space-y-1">
+                  <div>• 牌照稅: <span id="fairLicenseSeller">--</span> 元</div>
+                  <div>• 燃料稅: <span id="fairFuelSeller">--</span> 元</div>
+                  <div class="border-t border-slate-200/60 pt-1 font-bold">小計: <span id="fairTotalSeller">--</span> 元</div>
+                </div>
+              </div>
+              <div>
+                <span class="text-blue-700 font-bold block">新車主理應自付 (共 <span id="buyerDaysVal">--</span> 天)</span>
+                <div class="text-slate-900 font-medium text-sm mt-1 space-y-1">
+                  <div>• 牌照稅: <span id="fairLicenseBuyer">--</span> 元</div>
+                  <div>• 燃料稅: <span id="fairFuelBuyer">--</span> 元</div>
+                  <div class="border-t border-slate-200/60 pt-1 font-bold">小計: <span id="fairTotalBuyer">--</span> 元</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Step 1 For Suspension -->
+            <div id="step1SuspensionBox" class="hidden text-xs bg-slate-50 p-4 rounded-xl space-y-3">
+              <div class="flex justify-between items-center border-b border-slate-200 pb-2">
+                <span class="text-slate-750 font-bold text-sm">停牌前車主法定負擔天數：</span>
+                <span class="font-bold text-brand-700 text-sm"><span id="suspensionDaysVal">--</span> 天 (1/1 ~ 停牌日)</span>
+              </div>
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <span class="text-slate-500 font-medium">車主法定應付牌照稅 (按日)：</span>
+                  <strong class="text-slate-900 text-sm block mt-0.5" id="suspensionFairLicense">-- 元</strong>
+                </div>
+                <div>
+                  <span class="text-slate-500 font-medium">車主法定應付燃料稅 (按日)：</span>
+                  <strong class="text-slate-900 text-sm block mt-0.5" id="suspensionFairFuel">-- 元</strong>
+                </div>
+              </div>
+              <div class="pt-2 border-t border-slate-200/60 flex justify-between items-center">
+                <span class="font-bold text-slate-800">車主停牌前理應自付總額：</span>
+                <strong class="text-emerald-700 text-base" id="suspensionFairTotal">-- 元</strong>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 2: DMV Reality Counter Cash -->
+          <div>
+            <div class="flex items-center gap-2 text-sm font-bold text-slate-800 mb-2" id="step2Title">
+              <span class="w-5 h-5 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center text-xs font-mono">2</span>
+              第二步：監理所臨櫃補清 (過戶時稅金需100%全繳)
+            </div>
+            
+            <!-- Step 2 For Ownership Transfer -->
+            <div id="step2TransferBox" class="bg-slate-50 p-4 rounded-xl flex flex-col gap-2 text-xs">
+              <div class="flex justify-between items-center">
+                <span class="text-slate-600 font-medium">臨櫃牌照稅補繳 (全額)：</span>
+                <span class="font-bold text-slate-900" id="dmvLicenseDetail">-- 元</span>
+              </div>
+              <div class="flex justify-between items-center">
+                <span class="text-slate-600 font-medium">臨櫃燃料稅補繳 (全額)：</span>
+                <span class="font-bold text-slate-900" id="dmvFuelDetail">-- 元</span>
+              </div>
+              <div class="border-t border-slate-200/60 pt-2 flex justify-between items-center text-sm font-bold text-slate-900">
+                <span>現場臨櫃需補清總額：</span>
+                <span class="text-brand-700" id="dmvTotalDetail">-- 元</span>
+              </div>
+              <div class="mt-1 text-[11px] bg-brand-50 text-brand-900 p-2.5 rounded border border-brand-100">
+                🔊 <b>實務叮嚀：</b>監理所辦理過戶時，不論是否已達開徵期，當年度未繳之牌照稅與燃料稅都<b>必須全額繳清 (100%)</b>。本案現場需繳納共 <span class="font-bold text-brand-700" id="dmvTotalSummarySpan">-- 元</span>。
+              </div>
+            </div>
+
+            <!-- Step 2 For Suspension -->
+            <div id="step2SuspensionBox" class="hidden bg-slate-50 p-4 rounded-xl flex flex-col gap-2 text-xs">
+              <div class="flex justify-between items-center">
+                <span class="text-slate-600 font-medium">牌照稅今年度已先繳納：</span>
+                <span class="font-bold text-slate-900" id="suspensionPaidLicense">-- 元</span>
+              </div>
+              <div class="flex justify-between items-center">
+                <span class="text-slate-600 font-medium">燃料稅今年度已先繳納：</span>
+                <span class="font-bold text-slate-900" id="suspensionPaidFuel">-- 元</span>
+              </div>
+              <div class="border-t border-slate-200/60 pt-2 flex justify-between items-center text-sm font-bold text-slate-900">
+                <span>車主今年度已繳納總額：</span>
+                <span class="text-brand-700" id="suspensionPaidTotal">-- 元</span>
+              </div>
+              <p class="text-[10px] text-slate-400 mt-1 leading-snug">
+                * 說明：停牌辦理時，已預繳之天數（過戶後天數）可以向政府申請退還；未預繳之天數（持有天數）則需於現場補繳。
+              </p>
+            </div>
+          </div>
+
+          <!-- Step 3: Final Private Compensation (The Answer) -->
+          <div class="bg-gradient-to-br from-brand-900 to-emerald-950 text-white rounded-xl p-5 relative overflow-hidden shadow-md">
+            <div class="flex items-center gap-2 text-sm font-bold text-emerald-300 mb-2" id="step3Title">
+              <span class="w-5 h-5 rounded-full bg-emerald-800 text-emerald-200 flex items-center justify-center text-xs font-mono">3</span>
+              第三步：新舊車主「私下退補」最終對帳方案
+            </div>
+            
+            <div class="my-4">
+              <div class="text-[11px] text-emerald-200/80" id="step3DescLabel">在車價以外，過戶當天：</div>
+              <div class="text-2xl md:text-3xl font-black text-brand-100 mt-1" id="netResultValue">-- 元</div>
+              <div class="text-xs text-emerald-100/95 mt-3 leading-relaxed bg-white/10 p-3.5 rounded-lg border border-white/5" id="netResultDesc">
+                --
+              </div>
+            </div>
+            
+            <!-- Safe Math formula -->
+            <div class="border-t border-emerald-800/60 pt-3 text-[10px] text-emerald-300/80 space-y-1" id="step3FormulaText">
+              <div>📐 <b>對帳公式：</b>舊車主實際支付總額 (包含過戶前已繳與現場代付) - 舊車主應負擔法理總額</div>
+              <div>= 新車主應退補給舊車主的溢付現金。此方法最客觀，不受誰在現場付現而影響結果。</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Progress Timeline Graph -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-5">
+          <h4 class="text-sm font-bold text-slate-800 mb-4 flex items-center justify-between">
+            <span>年度天數分攤比例</span>
+            <span class="text-xs text-slate-400 font-normal" id="totalDaysLabel">總計 -- 天</span>
+          </h4>
+          
+          <!-- Visual Bar -->
+          <div class="w-full bg-slate-100 rounded-full h-5 overflow-hidden flex mb-4">
+            <div id="barSeller" class="bg-emerald-500 hover:bg-emerald-600 transition-colors flex items-center justify-center text-[10px] text-white font-bold h-full" style="width: 50%">
+              --%
+            </div>
+            <div id="barBuyer" class="bg-blue-500 hover:bg-blue-600 transition-colors flex items-center justify-center text-[10px] text-white font-bold h-full" style="width: 50%">
+              --%
+            </div>
+          </div>
+
+          <!-- Legend -->
+          <div class="grid grid-cols-2 gap-4 text-xs">
+            <div class="border-l-4 border-emerald-500 pl-2">
+              <span id="legendTitleSeller" class="text-slate-500 font-medium block">舊車主負擔天數</span>
+              <strong class="text-slate-950 text-sm mt-0.5 block" id="legendSeller">-- 天 (1/1 ~ --)</strong>
+            </div>
+            <div class="border-l-4 border-blue-500 pl-2" id="legendBuyerCol">
+              <span id="legendTitleBuyer" class="text-slate-500 font-medium block">新車主負擔天數</span>
+              <strong class="text-slate-950 text-sm mt-0.5 block" id="legendBuyer">-- 天 (-- ~ 12/31)</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- Detailed Breakdown -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden">
+          <div class="p-5 border-b border-slate-100">
+            <h3 class="font-bold text-slate-950" id="breakdownTableTitle">各項稅款拆帳明細</h3>
+          </div>
+          
+          <table class="w-full text-left border-collapse text-sm">
+            <thead>
+              <tr class="bg-slate-50/70 border-b border-slate-100 text-slate-500 font-medium">
+                <th class="p-4">項目/年額</th>
+                <th class="p-4">繳納狀態</th>
+                <th class="p-4" id="thSellerName">舊車主應負擔</th>
+                <th class="p-4" id="thBuyerName">新車主應負擔</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+              <!-- License Row -->
+              <tr>
+                <td class="p-4">
+                  <div class="font-bold text-slate-900">牌照稅</div>
+                  <div class="text-xs text-slate-400 mt-0.5" id="rowLicenseAnnual">年額: -- 元</div>
+                </td>
+                <td class="p-4" id="rowLicenseStatus">--</td>
+                <td class="p-4 text-emerald-700 font-semibold" id="rowLicenseSeller">-- 元</td>
+                <td class="p-4 text-blue-700 font-semibold" id="rowLicenseBuyer">-- 元</td>
+              </tr>
+              <!-- Fuel Row -->
+              <tr>
+                <td class="p-4">
+                  <div class="font-bold text-slate-900">燃料稅</div>
+                  <div class="text-xs text-slate-400 mt-0.5" id="rowFuelAnnual">年額: -- 元</div>
+                </td>
+                <td class="p-4" id="rowFuelStatus">--</td>
+                <td class="p-4 text-emerald-700 font-semibold" id="rowFuelSeller">-- 元</td>
+                <td class="p-4 text-blue-700 font-semibold" id="rowFuelBuyer">-- 元</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- LINE/SMS Share Builder -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-5">
+          <div class="flex items-center justify-between mb-3">
+            <h4 class="text-sm font-bold text-slate-950 flex items-center gap-2">
+              <svg class="w-4 h-4 text-brand-600" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M21.9 10.4c-.1-.6-.3-1.2-.7-1.7-.8-1.1-2-1.8-3.4-1.9-1.3-.1-2.5.4-3.5 1.2-1 .8-1.7 1.9-2.1 3.2-.3 1.2-.3 2.5 0 3.7.3 1.2.9 2.3 1.8 3.1 1 .9 2.2 1.4 3.6 1.4 1.4 0 2.6-.5 3.6-1.4 1-.9 1.6-2.1 1.8-3.4.3-1.4.2-2.8-.1-4.2zm-4.7 6.4c-1.1 0-2.1-.4-2.8-1.2-.7-.8-1.1-1.8-1.1-2.9 0-1.1.4-2.1 1.2-2.8.8-.7 1.8-1.1 2.9-1.1 1.1 0 2.1.4 2.8 1.1.8.8 1.1 1.8 1.1 2.9 0 1.1-.4 2.1-1.2 2.8-.7.8-1.8 1.2-2.9 1.2z"></path>
+              </svg>
+              交易方對帳便條 (一鍵複製)
+            </h4>
+            <span class="text-xs text-slate-400">點擊按鈕直接複製完整對帳文字</span>
+          </div>
+          
+          <textarea id="outputSummary" readonly class="w-full h-36 bg-slate-50 border border-slate-200 rounded-xl p-3.5 text-xs font-mono text-slate-700 focus:outline-none resize-none leading-relaxed"></textarea>
+          
+          <div class="mt-3 flex justify-end">
+            <button id="btnCopy" class="flex items-center gap-2 px-5 py-2.5 bg-brand-600 hover:bg-brand-700 active:bg-brand-800 text-white font-semibold text-sm rounded-xl shadow-sm transition-all">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m-2 4h.01M9 16h.01M9 12h.01M13 16h3m-3-4h3"></path>
+              </svg>
+              複製對帳明細
+            </button>
+          </div>
+        </div>
+
+      </section>
+
+    </div>
+
+  </main>
+
+  <!-- Notification Toast -->
+  <div id="toast" class="fixed bottom-6 right-6 bg-slate-900 text-slate-100 text-sm py-3 px-5 rounded-xl shadow-lg flex items-center gap-2 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none z-50">
+    <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+    </svg>
+    <span id="toastMsg">複製成功！已複製到您的剪貼簿。</span>
+  </div>
+
+  <!-- Footer -->
+  <footer class="w-full bg-slate-100 border-t border-slate-200 py-4 px-6 text-center text-xs text-slate-400">
+    中華民國監理法規稅制參考 · 支持手動微調稅額 · 精確度採用每日四捨五入分帳
+  </footer>
+
+  <!-- Scripts & Application Logic -->
+  <script>
+    // 依據使用者上傳圖表進行 100% 精確重構的稅額資料庫
+    const taxDatabase = {
+      // 自用小客車 (結合牌照稅 11 個級距 + 燃料稅 14 個級距，拆解為不重疊區間)
+      passenger: [
+        { license: 1620, fuelGas: 2160, fuelDiesel: 1296, label: "251 ~ 500 c.c." },
+        { license: 2160, fuelGas: 2880, fuelDiesel: 1728, label: "501 ~ 600 c.c." },
+        { license: 4320, fuelGas: 4320, fuelDiesel: 2592, label: "601 ~ 1200 c.c." },
+        { license: 7120, fuelGas: 4800, fuelDiesel: 2880, label: "1201 ~ 1800 c.c." },
+        { license: 11230, fuelGas: 6180, fuelDiesel: 3708, label: "1801 ~ 2400 c.c." },
+        { license: 15210, fuelGas: 7200, fuelDiesel: 4320, label: "2401 ~ 3000 c.c." },
+        { license: 28220, fuelGas: 8640, fuelDiesel: 5184, label: "3001 ~ 3600 c.c." },
+        { license: 28220, fuelGas: 9810, fuelDiesel: 5886, label: "3601 ~ 4200 c.c." },
+        { license: 46170, fuelGas: 11220, fuelDiesel: 6732, label: "4201 ~ 4800 c.c." },
+        { license: 46170, fuelGas: 12180, fuelDiesel: 7308, label: "4801 ~ 5400 c.c." },
+        { license: 69690, fuelGas: 13080, fuelDiesel: 7848, label: "5401 ~ 6000 c.c." },
+        { license: 69690, fuelGas: 13950, fuelDiesel: 8370, label: "6001 ~ 6600 c.c." },
+        { license: 117000, fuelGas: 14910, fuelDiesel: 8946, label: "6601 ~ 7200 c.c." },
+        { license: 117000, fuelGas: 15720, fuelDiesel: 9432, label: "7201 ~ 7800 c.c." },
+        { license: 151200, fuelGas: 15720, fuelDiesel: 9432, label: "7801 c.c. 以上" }
+      ],
+      // 自用小貨車 (結合牌照稅 18 個級距 + 燃料稅 22 個級距，拆解為不重疊區間)
+      cargo: [
+        { license: 900, fuelGas: 2160, fuelDiesel: 1296, label: "251 ~ 500 c.c. (牌照500以下)" },
+        { license: 1080, fuelGas: 2880, fuelDiesel: 1728, label: "501 ~ 600 c.c." },
+        { license: 1800, fuelGas: 4320, fuelDiesel: 2592, label: "601 ~ 1200 c.c." },
+        { license: 2700, fuelGas: 4800, fuelDiesel: 2880, label: "1201 ~ 1800 c.c." },
+        { license: 3600, fuelGas: 7710, fuelDiesel: 4626, label: "1801 ~ 2400 c.c." },
+        { license: 4500, fuelGas: 9900, fuelDiesel: 5940, label: "2401 ~ 3000 c.c." },
+        { license: 5400, fuelGas: 11880, fuelDiesel: 7128, label: "3001 ~ 3600 c.c. " },
+        { license: 6300, fuelGas: 13500, fuelDiesel: 8100, label: "3601 ~ 4200 c.c." },
+        { license: 7200, fuelGas: 15420, fuelDiesel: 9252, label: "4201 ~ 4800 c.c." },
+        { license: 8100, fuelGas: 16740, fuelDiesel: 10044, label: "4801 ~ 5400 c.c." },
+        { license: 9000, fuelGas: 18000, fuelDiesel: 10800, label: "5401 ~ 6000 c.c." },
+        { license: 9900, fuelGas: 19170, fuelDiesel: 11502, label: "6001 ~ 6600 c.c." },
+        { license: 10800, fuelGas: 20490, fuelDiesel: 12294, label: "6601 ~ 7200 c.c." },
+        { license: 11700, fuelGas: 25530, fuelDiesel: 15318, label: "7201 ~ 7800 c.c." },
+        { license: 12600, fuelGas: 25530, fuelDiesel: 15318, label: "7801 ~ 8000 c.c." },
+        { license: 12600, fuelGas: 27000, fuelDiesel: 16200, label: "8001 ~ 8400 c.c." },
+        { license: 13500, fuelGas: 27000, fuelDiesel: 16200, label: "8401 ~ 9000 c.c." },
+        { license: 14400, fuelGas: 28650, fuelDiesel: 17190, label: "9001 ~ 9600 c.c." },
+        { license: 15300, fuelGas: 28650, fuelDiesel: 17190, label: "9601 ~ 10000 c.c." },
+        { license: 15300, fuelGas: 32880, fuelDiesel: 19728, label: "10001 ~ 10200 c.c." },
+        { license: 16200, fuelGas: 32880, fuelDiesel: 19728, label: "10201 ~ 11000 c.c." },
+        { license: 16200, fuelGas: 36810, fuelDiesel: 22086, label: "11001 ~ 12000 c.c." },
+        { license: 16200, fuelGas: 43710, fuelDiesel: 26226, label: "12001 ~ 13000 c.c." },
+        { license: 16200, fuelGas: 54000, fuelDiesel: 32400, label: "13001 ~ 14000 c.c." },
+        { license: 16200, fuelGas: 54000, fuelDiesel: 32400, label: "14001 c.c. 以上" }
+      ]
+    };
+
+    // 當前應用程式狀態 (State)
+    const state = {
+      purpose: 'transfer', // 辦理業務：'transfer' (過戶) 或是 'suspension' (停牌報廢)
+      type: 'cargo', // 預設貨車
+      selectedCcIndex: 6, // 預設 3001-3600c.c. (對齊牌照稅5400 / 燃料稅11880)
+      fuelType: 'gas',
+      licensePaid: false,
+      fuelPaid: true,
+      counterPayer: 'seller', // 預設現場由舊車主支付
+      splitDate: '2026-06-16' // 原問題過戶日
+    };
+
+    // DOM 元素引用
+    const selectCc = document.getElementById('selectCc');
+    const selectFuel = document.getElementById('selectFuel');
+    const checkLicensePaid = document.getElementById('checkLicensePaid');
+    const checkFuelPaid = document.getElementById('checkFuelPaid');
+    const inputDate = document.getElementById('inputDate');
+    const inputAnnualLicense = document.getElementById('inputAnnualLicense');
+    const inputAnnualFuel = document.getElementById('inputAnnualFuel');
+    const counterPayerSection = document.getElementById('counterPayerSection');
+    
+    // 初始化設定
+    window.onload = () => {
+      inputDate.value = state.splitDate;
+      populateCcOptions();
+      syncDatabaseToInputs();
+      setupEventListeners();
+      calculateAndRender();
+    };
+
+    // 切換辦理目的
+    function setPurpose(purpose) {
+      state.purpose = purpose;
+      const purposeTransfer = document.getElementById('purposeTransfer');
+      const purposeSuspension = document.getElementById('purposeSuspension');
+
+      if (purpose === 'transfer') {
+        purposeTransfer.className = "py-2.5 px-4 border rounded-xl flex flex-col items-center justify-center transition-all bg-brand-50 border-brand-500 text-brand-900 ring-2 ring-brand-500/15";
+        purposeSuspension.className = "py-2.5 px-4 border border-slate-200 rounded-xl flex flex-col items-center justify-center transition-all hover:bg-slate-50 text-slate-700";
+        counterPayerSection.style.display = 'block';
+        
+        // 變更左側切分日期標題
+        document.getElementById('dateLabelText').innerText = "過戶切分日期 (雙方交車日)";
+        document.getElementById('dateExplainText').innerText = "* 依照法規，過戶當日的稅費計在舊車主身上。";
+      } else {
+        purposeSuspension.className = "py-2.5 px-4 border rounded-xl flex flex-col items-center justify-center transition-all bg-brand-50 border-brand-500 text-brand-900 ring-2 ring-brand-500/15";
+        purposeTransfer.className = "py-2.5 px-4 border border-slate-200 rounded-xl flex flex-col items-center justify-center transition-all hover:bg-slate-50 text-slate-700";
+        counterPayerSection.style.display = 'none';
+        
+        // 變更左側切分日期標題
+        document.getElementById('dateLabelText').innerText = "停牌報廢辦理日期";
+        document.getElementById('dateExplainText').innerText = "* 稅捐機關與監理所將退補稅費計算至停牌辦理當日為止。";
+      }
+      calculateAndRender();
+    }
+
+    // 動態填充排氣量級距下拉選單
+    function populateCcOptions() {
+      selectCc.innerHTML = '';
+      const list = taxDatabase[state.type];
+      list.forEach((item, index) => {
+        const option = document.createElement('option');
+        option.value = index;
+        option.innerText = item.label;
+        if (index === state.selectedCcIndex) {
+          option.selected = true;
+        }
+        selectCc.appendChild(option);
+      });
+    }
+
+    // 將資料庫數值同步至可編輯 input
+    function syncDatabaseToInputs() {
+      const activeTaxItem = taxDatabase[state.type][state.selectedCcIndex];
+      if (activeTaxItem) {
+        inputAnnualLicense.value = activeTaxItem.license;
+        inputAnnualFuel.value = state.fuelType === 'gas' ? activeTaxItem.fuelGas : activeTaxItem.fuelDiesel;
+      }
+    }
+
+    // 設定過戶現場誰付現
+    function setCounterPayer(payer) {
+      state.counterPayer = payer;
+      const labelSeller = document.getElementById('labelPaySeller');
+      const labelBuyer = document.getElementById('labelPayBuyer');
+
+      if (payer === 'seller') {
+        labelSeller.className = "flex items-center justify-center gap-2 p-2.5 border rounded-lg bg-white hover:bg-slate-50 cursor-pointer border-brand-500 ring-2 ring-brand-500/10";
+        labelBuyer.className = "flex items-center justify-center gap-2 p-2.5 border rounded-lg bg-white hover:bg-slate-50 cursor-pointer border-slate-200";
+      } else {
+        labelBuyer.className = "flex items-center justify-center gap-2 p-2.5 border rounded-lg bg-white hover:bg-slate-50 cursor-pointer border-brand-500 ring-2 ring-brand-500/10";
+        labelSeller.className = "flex items-center justify-center gap-2 p-2.5 border rounded-lg bg-white hover:bg-slate-50 cursor-pointer border-slate-200";
+      }
+      calculateAndRender();
+    }
+
+    // 車種按鈕切換邏輯
+    function setVehicleType(type) {
+      state.type = type;
+      const passengerBtn = document.getElementById('typePassenger');
+      const cargoBtn = document.getElementById('typeCargo');
+
+      if (type === 'passenger') {
+        passengerBtn.className = "py-3 px-4 border rounded-xl flex flex-col items-center gap-1 transition-all bg-brand-50 border-brand-500 text-brand-900 ring-2 ring-brand-500/15";
+        cargoBtn.className = "py-3 px-4 border border-slate-200 rounded-xl flex flex-col items-center gap-1 transition-all hover:bg-slate-50 text-slate-700";
+        passengerBtn.querySelector('svg').className.baseVal = "w-6 h-6 text-brand-600";
+        cargoBtn.querySelector('svg').className.baseVal = "w-6 h-6 text-slate-500";
+        state.selectedCcIndex = 3; // 預設小客車 1201-1800
+      } else {
+        cargoBtn.className = "py-3 px-4 border rounded-xl flex flex-col items-center gap-1 transition-all bg-brand-50 border-brand-500 text-brand-900 ring-2 ring-brand-500/15";
+        passengerBtn.className = "py-3 px-4 border border-slate-200 rounded-xl flex flex-col items-center gap-1 transition-all hover:bg-slate-50 text-slate-700";
+        cargoBtn.querySelector('svg').className.baseVal = "w-6 h-6 text-brand-600";
+        passengerBtn.querySelector('svg').className.baseVal = "w-6 h-6 text-slate-500";
+        state.selectedCcIndex = 6; // 預設大貨車 3001-3600c.c. (即為 11880/5400 之原配置)
+      }
+      populateCcOptions();
+      syncDatabaseToInputs();
+      calculateAndRender();
+    }
+
+    // 註冊所有事件監聽器
+    function setupEventListeners() {
+      selectCc.addEventListener('change', (e) => {
+        state.selectedCcIndex = parseInt(e.target.value);
+        syncDatabaseToInputs();
+        calculateAndRender();
+      });
+
+      selectFuel.addEventListener('change', (e) => {
+        state.fuelType = e.target.value;
+        syncDatabaseToInputs();
+        calculateAndRender();
+      });
+
+      inputAnnualLicense.addEventListener('input', () => {
+        calculateAndRender();
+      });
+
+      inputAnnualFuel.addEventListener('input', () => {
+        calculateAndRender();
+      });
+
+      checkLicensePaid.addEventListener('change', (e) => {
+        state.licensePaid = e.target.checked;
+        calculateAndRender();
+      });
+
+      checkFuelPaid.addEventListener('change', (e) => {
+        state.fuelPaid = e.target.checked;
+        calculateAndRender();
+      });
+
+      inputDate.addEventListener('input', (e) => {
+        state.splitDate = e.target.value;
+        calculateAndRender();
+      });
+
+      document.getElementById('btnCopy').addEventListener('click', () => {
+        const textarea = document.getElementById('outputSummary');
+        textarea.select();
+        document.execCommand('copy');
+        showToast("已成功複製對帳明細到剪貼簿！");
+      });
+    }
+
+    // 核心計算與畫面渲染
+    function calculateAndRender() {
+      if (!state.splitDate) return;
+
+      const dateObj = new Date(state.splitDate);
+      if (isNaN(dateObj.getTime())) return;
+
+      const year = dateObj.getFullYear();
+      document.getElementById('badgeYear').innerText = `${year}年度`;
+
+      // 1. 天數計算 (考慮閏年)
+      const isLeap = (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0);
+      const totalDays = isLeap ? 366 : 365;
+      document.getElementById('totalDaysLabel').innerText = `總計 ${totalDays} 天`;
+
+      const startOfYear = new Date(year, 0, 1);
+      const diffTime = Math.abs(dateObj - startOfYear);
+      const sellerDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+      const buyerDays = totalDays - sellerDays;
+
+      if (sellerDays < 1 || sellerDays > totalDays) return;
+
+      // 根據辦理業務動態調整佈局與天數提示
+      const step1TransferBox = document.getElementById('step1TransferBox');
+      const step1SuspensionBox = document.getElementById('step1SuspensionBox');
+      const step2TransferBox = document.getElementById('step2TransferBox');
+      const step2SuspensionBox = document.getElementById('step2SuspensionBox');
+      const legendBuyerCol = document.getElementById('legendBuyerCol');
+
+      if (state.purpose === 'transfer') {
+        // 過戶模式
+        step1TransferBox.classList.remove('hidden');
+        step1SuspensionBox.classList.add('hidden');
+        step2TransferBox.classList.remove('hidden');
+        step2SuspensionBox.classList.add('hidden');
+        legendBuyerCol.classList.remove('hidden');
+        
+        document.getElementById('mainCardTitle').innerHTML = `<span class="w-2 h-6 bg-brand-600 rounded"></span>過戶稅費按日退補精密算理`;
+        document.getElementById('step1Title').innerHTML = `<span class="w-5 h-5 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center text-xs font-mono">1</span>第一步：新舊車主按日應負擔比例`;
+        document.getElementById('step2Title').innerHTML = `<span class="w-5 h-5 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center text-xs font-mono">2</span>第二步：監理所臨櫃補清 (過戶時稅金需100%全繳)`;
+        document.getElementById('step3Title').innerHTML = `<span class="w-5 h-5 rounded-full bg-emerald-800 text-emerald-200 flex items-center justify-center text-xs font-mono">3</span>第三步：新舊車主「私下退補」最終對帳方案`;
+        document.getElementById('step3DescLabel').innerText = "在車價以外，過戶當天：";
+        document.getElementById('step3FormulaText').innerHTML = `<div>📐 <b>對帳公式：</b>舊車主實際支付總額 (包含過戶前已繳與現場代付) - 舊車主應負擔法理總額</div><div>= 新車主應退補給舊車主的溢付現金。此方法最客觀，不受誰在現場付現而影響結果。</div>`;
+        
+        document.getElementById('legendTitleSeller').innerText = "舊車主負擔天數";
+        document.getElementById('breakdownTableTitle').innerText = "各項稅款拆帳明細 (過戶拆帳)";
+        document.getElementById('thSellerName').innerText = "舊車主應負擔";
+        document.getElementById('thBuyerName').innerText = "新車主應負擔";
+      } else {
+        // 停牌報廢模式
+        step1TransferBox.classList.add('hidden');
+        step1SuspensionBox.classList.remove('hidden');
+        step2TransferBox.classList.add('hidden');
+        step2SuspensionBox.classList.remove('hidden');
+        legendBuyerCol.classList.add('hidden'); // 停牌不需要看買家
+        
+        document.getElementById('mainCardTitle').innerHTML = `<span class="w-2 h-6 bg-brand-600 rounded"></span>停牌報廢稅金退補精密試算`;
+        document.getElementById('step1Title').innerHTML = `<span class="w-5 h-5 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center text-xs font-mono">1</span>第一步：車主法定持有日數應負擔稅額`;
+        document.getElementById('step2Title').innerHTML = `<span class="w-5 h-5 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center text-xs font-mono">2</span>第二步：車主年度已繳納狀態核對`;
+        document.getElementById('step3Title').innerHTML = `<span class="w-5 h-5 rounded-full bg-emerald-800 text-emerald-200 flex items-center justify-center text-xs font-mono">3</span>第三步：監理所/稅捐所「退稅與補繳」沖銷清算`;
+        document.getElementById('step3DescLabel').innerText = "辦理停牌登記後，車主與政府清算：";
+        document.getElementById('step3FormulaText').innerHTML = `<div>📐 <b>退補公式：</b>車主今年度已繳總額 - 車主法定持有天數應負擔總額</div><div>= 正值為「政府應退還車主稅金」，負值為「車主現場應補繳稅金」。</div>`;
+        
+        document.getElementById('legendTitleSeller').innerText = "車主法定持有天數";
+        document.getElementById('breakdownTableTitle').innerText = "各項稅款退補明細 (與政府結算)";
+        document.getElementById('thSellerName').innerText = "法定應負擔";
+        document.getElementById('thBuyerName').innerText = "溢繳/未繳狀況";
+      }
+
+      // 更新進度條
+      const sellerPercent = ((sellerDays / totalDays) * 100).toFixed(1);
+      const buyerPercent = (100 - parseFloat(sellerPercent)).toFixed(1);
+
+      const barSeller = document.getElementById('barSeller');
+      const barBuyer = document.getElementById('barBuyer');
+
+      if (state.purpose === 'transfer') {
+        barSeller.style.width = `${sellerPercent}%`;
+        barSeller.innerText = `舊車主: ${sellerPercent}% (${sellerDays}天)`;
+        barBuyer.style.display = 'flex';
+        barBuyer.style.width = `${buyerPercent}%`;
+        barBuyer.innerText = `新車主: ${buyerPercent}% (${buyerDays}天)`;
+      } else {
+        barSeller.style.width = '100%';
+        barSeller.innerText = `法定持有天數: ${sellerPercent}% (${sellerDays}天)`;
+        barBuyer.style.display = 'none'; // 停牌不顯示買家
+      }
+
+      const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
+      const dd = String(dateObj.getUTCDate()).padStart(2, '0');
+      document.getElementById('legendSeller').innerText = `${sellerDays} 天 (1/1 ~ ${mm}/${dd})`;
+      
+      const nextDay = new Date(dateObj);
+      nextDay.setDate(dateObj.getDate() + 1);
+      const nMm = String(nextDay.getMonth() + 1).padStart(2, '0');
+      const nDd = String(nextDay.getUTCDate()).padStart(2, '0');
+      document.getElementById('legendBuyer').innerText = `${buyerDays} 天 (${nMm}/${nDd} ~ 12/31)`;
+
+      // 設置天數數值
+      document.getElementById('sellerDaysVal').innerText = sellerDays;
+      document.getElementById('buyerDaysVal').innerText = buyerDays;
+      document.getElementById('suspensionDaysVal').innerText = sellerDays;
+
+      // 2. 稅額獲取
+      const annualLicense = parseInt(inputAnnualLicense.value) || 0;
+      const annualFuel = parseInt(inputAnnualFuel.value) || 0;
+
+      document.getElementById('rowLicenseAnnual').innerText = `年額: ${formatMoney(annualLicense)} 元`;
+      document.getElementById('rowFuelAnnual').innerText = `年額: ${formatMoney(annualFuel)} 元`;
+
+      // 3. 理論按日分攤法理負擔額 (四捨五入)
+      const sellerLicenseShare = Math.round(annualLicense * (sellerDays / totalDays));
+      const buyerLicenseShare = annualLicense - sellerLicenseShare;
+
+      const sellerFuelShare = Math.round(annualFuel * (sellerDays / totalDays));
+      const buyerFuelShare = annualFuel - sellerFuelShare;
+
+      const fairTotalSellerVal = sellerLicenseShare + sellerFuelShare;
+      const fairTotalBuyerVal = buyerLicenseShare + buyerFuelShare;
+
+      // 更新法理應負擔數值
+      document.getElementById('fairLicenseSeller').innerText = formatMoney(sellerLicenseShare);
+      document.getElementById('fairLicenseBuyer').innerText = formatMoney(buyerLicenseShare);
+      document.getElementById('fairFuelSeller').innerText = formatMoney(sellerFuelShare);
+      document.getElementById('fairFuelBuyer').innerText = formatMoney(buyerFuelShare);
+      document.getElementById('fairTotalSeller').innerText = formatMoney(fairTotalSellerVal);
+      document.getElementById('fairTotalBuyer').innerText = formatMoney(fairTotalBuyerVal);
+
+      // 停牌專用第一步數值
+      document.getElementById('suspensionFairLicense').innerText = `${formatMoney(sellerLicenseShare)} 元`;
+      document.getElementById('suspensionFairFuel').innerText = `${formatMoney(sellerFuelShare)} 元`;
+      document.getElementById('suspensionFairTotal').innerText = `${formatMoney(fairTotalSellerVal)} 元`;
+
+      // 臨櫃或已繳清數值明細
+      const dmvPaidLicense = state.licensePaid ? 0 : annualLicense; 
+      const dmvPaidFuel = state.fuelPaid ? 0 : annualFuel;
+      const dmvTotal = dmvPaidLicense + dmvPaidFuel;
+
+      document.getElementById('dmvLicenseDetail').innerText = state.licensePaid ? "0 元 (過戶前已繳清)" : `${formatMoney(annualLicense)} 元 (需現場全額補齊)`;
+      document.getElementById('dmvFuelDetail').innerText = state.fuelPaid ? "0 元 (過戶前已繳清)" : `${formatMoney(annualFuel)} 元 (需現場全額補齊)`;
+      document.getElementById('dmvTotalDetail').innerText = `${formatMoney(dmvTotal)} 元`;
+      document.getElementById('dmvTotalSummarySpan').innerText = `${formatMoney(dmvTotal)}`;
+
+      // 停牌專用第二步數值
+      document.getElementById('suspensionPaidLicense').innerText = state.licensePaid ? `${formatMoney(annualLicense)} 元 (已繳清)` : "0 元 (未繳)";
+      document.getElementById('suspensionPaidFuel').innerText = state.fuelPaid ? `${formatMoney(annualFuel)} 元 (已繳清)` : "0 元 (未繳)";
+      const sellerPrepaid = (state.licensePaid ? annualLicense : 0) + (state.fuelPaid ? annualFuel : 0);
+      document.getElementById('suspensionPaidTotal').innerText = `${formatMoney(sellerPrepaid)} 元`;
+
+      // 4. 稅款明細表格內容依業務目的動態切換
+      const rowLicenseSeller = document.getElementById('rowLicenseSeller');
+      const rowLicenseBuyer = document.getElementById('rowLicenseBuyer');
+      const rowFuelSeller = document.getElementById('rowFuelSeller');
+      const rowFuelBuyer = document.getElementById('rowFuelBuyer');
+
+      if (state.purpose === 'transfer') {
+        rowLicenseSeller.innerText = `${formatMoney(sellerLicenseShare)} 元`;
+        rowLicenseBuyer.innerText = `${formatMoney(buyerLicenseShare)} 元`;
+        rowFuelSeller.innerText = `${formatMoney(sellerFuelShare)} 元`;
+        rowFuelBuyer.innerText = `${formatMoney(buyerFuelShare)} 元`;
+      } else {
+        // 停牌模式：右側顯示「政府退補狀況」
+        rowLicenseSeller.innerText = `${formatMoney(sellerLicenseShare)} 元`;
+        rowFuelSeller.innerText = `${formatMoney(sellerFuelShare)} 元`;
+
+        const licenseRefundDiff = (state.licensePaid ? annualLicense : 0) - sellerLicenseShare;
+        const fuelRefundDiff = (state.fuelPaid ? annualFuel : 0) - sellerFuelShare;
+
+        rowLicenseBuyer.innerHTML = licenseRefundDiff >= 0 
+          ? `<span class="text-emerald-600 font-bold">可退稅: ${formatMoney(licenseRefundDiff)} 元</span>`
+          : `<span class="text-amber-600 font-bold">需補繳: ${formatMoney(Math.abs(licenseRefundDiff))} 元</span>`;
+
+        rowFuelBuyer.innerHTML = fuelRefundDiff >= 0 
+          ? `<span class="text-emerald-600 font-bold">可退稅: ${formatMoney(fuelRefundDiff)} 元</span>`
+          : `<span class="text-amber-600 font-bold">需補繳: ${formatMoney(Math.abs(fuelRefundDiff))} 元</span>`;
+      }
+
+      // 5. 智慧第三步結算（最終退補值）
+      const netResultValue = document.getElementById('netResultValue');
+      const netResultDesc = document.getElementById('netResultDesc');
+
+      if (state.purpose === 'transfer') {
+        // 過戶帳務
+        const sellerCounterPaid = (state.counterPayer === 'seller') ? dmvTotal : 0;
+        const sellerTotalOutPocket = sellerPrepaid + sellerCounterPaid;
+        const netBuyerOwesSeller = sellerTotalOutPocket - fairTotalSellerVal;
+
+        if (netBuyerOwesSeller > 0) {
+          netResultValue.innerText = `新車主應現金支付給舊車主 NT$ ${formatMoney(netBuyerOwesSeller)} 元`;
+          
+          let desc = `<b>💡 精準拆帳說明：</b><br>`;
+          desc += `1. <b>總出資核對</b>：本車全年稅金共 <b>NT$ ${formatMoney(annualLicense + annualFuel)} 元</b>已由雙方協力清償：<br>`;
+          desc += `　• 舊車主先前已繳：<b>NT$ ${formatMoney(sellerPrepaid)} 元</b><br>`;
+          desc += `　• 過戶現場由【${state.counterPayer === 'seller' ? '舊車主' : '新車主'}】補繳：<b>NT$ ${formatMoney(dmvTotal)} 元</b><br>`;
+          desc += `　• 舊車主總累計付給政府：<b>NT$ ${formatMoney(sellerTotalOutPocket)} 元</b><br><br>`;
+          desc += `2. <b>法理分攤</b>：依天數，舊車主只需負擔其持有的 ${sellerDays} 天費用：<b>NT$ ${formatMoney(fairTotalSellerVal)} 元</b>。<br><br>`;
+          desc += `3. <b>對帳方案</b>：舊車主實際多付了 <b>NT$ ${formatMoney(netBuyerOwesSeller)} 元</b>。因此<b>新車主必須在過戶交車當天，私下給付舊車主 NT$ ${formatMoney(netBuyerOwesSeller)} 元</b>。`;
+          netResultDesc.innerHTML = desc;
+        } else if (netBuyerOwesSeller < 0) {
+          const absValue = Math.abs(netBuyerOwesSeller);
+          netResultValue.innerText = `舊車主應現金支付給新車主 NT$ ${formatMoney(absValue)} 元`;
+          
+          let desc = `<b>💡 精準拆帳說明：</b><br>`;
+          desc += `1. <b>總出資核對</b>：本車全年稅金共 <b>NT$ ${formatMoney(annualLicense + annualFuel)} 元</b>已由雙方協力清償：<br>`;
+          desc += `　• 舊車主先前已繳：<b>NT$ ${formatMoney(sellerPrepaid)} 元</b><br>`;
+          desc += `　• 新車主在現場支付了：<b>NT$ ${formatMoney(dmvTotal)} 元</b>（超過新車主自身應付的法理金額）<br><br>`;
+          desc += `2. <b>法理分攤</b>：依天數，舊車主應負擔其持有的 ${sellerDays} 天費用：<b>NT$ ${formatMoney(fairTotalSellerVal)} 元</b>。<br><br>`;
+          desc += `3. <b>對帳方案</b>：新車主在櫃檯代墊過多。因此<b>舊車主必須在過戶交車當天，私下給付新車主 NT$ ${formatMoney(absValue)} 元</b>。`;
+          netResultDesc.innerHTML = desc;
+        } else {
+          netResultValue.innerText = `雙方無退補金額 (0 元)`;
+          netResultDesc.innerHTML = `經計算，雙方各自出資金額完美等於日數比例應負擔額，無需私下進行現金退補。`;
+        }
+      } else {
+        // 停牌報廢帳務（政府與車主的退補關係）
+        // 公式：車主預先繳給政府的 - 車主法定理應負擔的日數金額
+        const netSuspensionDiff = sellerPrepaid - fairTotalSellerVal;
+
+        if (netSuspensionDiff > 0) {
+          // 政府退錢給車主 (應退稅金)
+          netResultValue.className = "text-2xl md:text-3xl font-black text-emerald-300 mt-1";
+          netResultValue.innerHTML = `政府應退還車主 NT$ <span class="text-white">${formatMoney(netSuspensionDiff)}</span> 元`;
+          
+          // 計算兩者明細
+          const licenseRefund = state.licensePaid ? (annualLicense - sellerLicenseShare) : 0;
+          const fuelRefund = state.fuelPaid ? (annualFuel - sellerFuelShare) : 0;
+          const licenseSupplement = !state.licensePaid ? sellerLicenseShare : 0;
+          const fuelSupplement = !state.fuelPaid ? sellerFuelShare : 0;
+
+          let desc = `<b>💡 停牌退補沖銷分析：</b><br>`;
+          desc += `• 車主已繳總額（NT$ ${formatMoney(sellerPrepaid)}）<b>大於</b> 停牌前法定應繳額（NT$ ${formatMoney(fairTotalSellerVal)}）。因此政府應辦理退稅。<br><br>`;
+          desc += `<b>各稅目沖銷細節：</b><br>`;
+          
+          if (licenseRefund > 0) {
+            desc += `1. <b>【牌照稅 (已預繳)】</b>：政府應退還停牌後剩餘 ${buyerDays} 天稅金：<span class="text-emerald-300 font-bold">NT$ ${formatMoney(licenseRefund)} 元</span>。<br>`;
+          } else {
+            desc += `1. <b>【牌照稅 (未繳納)】</b>：車主需現場補清 ${sellerDays} 天天數稅金：<span class="text-amber-300 font-bold">NT$ ${formatMoney(licenseSupplement)} 元</span>。<br>`;
+          }
+
+          if (fuelRefund > 0) {
+            desc += `2. <b>【燃料稅 (已預繳)】</b>：政府應退還停牌後剩餘 ${buyerDays} 天燃料費：<span class="text-emerald-300 font-bold">NT$ ${formatMoney(fuelRefund)} 元</span>。<br>`;
+          } else {
+            desc += `2. <b>【燃料稅 (未繳納)】</b>：車主需現場補繳 ${sellerDays} 天天數燃料費：<span class="text-amber-300 font-bold">NT$ ${formatMoney(fuelSupplement)} 元</span>。<br>`;
+          }
+
+          desc += `<br><b>👉 最終清算結論：</b><br>`;
+          desc += `此案例中，您退款金額大於您補繳金額。<b>辦理停牌報廢後，您可前往稅捐處與監理所，辦理退稅手續並退回支票（或匯入指定帳戶）共 NT$ ${formatMoney(netSuspensionDiff)} 元。</b>`;
+          
+          netResultDesc.innerHTML = desc;
+        } else if (netSuspensionDiff < 0) {
+          // 車主需要補繳給政府 (應補稅金)
+          const absValue = Math.abs(netSuspensionDiff);
+          netResultValue.className = "text-2xl md:text-3xl font-black text-amber-300 mt-1";
+          netResultValue.innerHTML = `車主現場應補繳 NT$ <span class="text-white">${formatMoney(absValue)}</span> 元`;
+
+          const licenseSupplement = !state.licensePaid ? sellerLicenseShare : 0;
+          const fuelSupplement = !state.fuelPaid ? sellerFuelShare : 0;
+          const licenseRefund = state.licensePaid ? (annualLicense - sellerLicenseShare) : 0;
+          const fuelRefund = state.fuelPaid ? (annualFuel - sellerFuelShare) : 0;
+
+          let desc = `<b>💡 停牌退補沖銷分析：</b><br>`;
+          desc += `• 車主已繳總額（NT$ ${formatMoney(sellerPrepaid)}）<b>小幕</b> 停牌前法定應繳額（NT$ ${formatMoney(fairTotalSellerVal)}）。因此辦理停牌時需於櫃檯補繳差額。<br><br>`;
+          desc += `<b>各稅目沖銷細節：</b><br>`;
+
+          if (licenseSupplement > 0) {
+            desc += `1. <b>【牌照稅 (未繳納)】</b>：車主需現場補繳 ${sellerDays} 天天數稅金：<span class="text-amber-300 font-bold">NT$ ${formatMoney(licenseSupplement)} 元</span>。<br>`;
+          } else {
+            desc += `1. <b>【牌照稅 (已預繳)】</b>：停牌後剩餘 ${buyerDays} 天稅金可退稅：<span class="text-emerald-300 font-bold">NT$ ${formatMoney(licenseRefund)} 元</span>。<br>`;
+          }
+
+          if (fuelSupplement > 0) {
+            desc += `2. <b>【燃料稅 (未繳納)】</b>：車主需現場補繳 ${sellerDays} 天天數燃料費：<span class="text-amber-300 font-bold">NT$ ${formatMoney(fuelSupplement)} 元</span>。<br>`;
+          } else {
+            desc += `2. <b>【燃料稅 (已預繳)】</b>：停牌後剩餘 ${buyerDays} 天燃料費可退稅：<span class="text-emerald-300 font-bold">NT$ ${formatMoney(fuelRefund)} 元</span>。<br>`;
+          }
+
+          desc += `<br><b>👉 最終清算結論：</b><br>`;
+          desc += `此案例中，您補繳金額大於退款金額。<b>辦理停牌報廢當天，監理所臨櫃人員會要求您刷卡或付現補繳 NT$ ${formatMoney(absValue)} 元後，始得完成停牌報廢登記。</b>`;
+
+          netResultDesc.innerHTML = desc;
+        } else {
+          netResultValue.className = "text-2xl md:text-3xl font-black text-brand-100 mt-1";
+          netResultValue.innerText = `剛好沖銷 (0 元)`;
+          netResultDesc.innerHTML = `車主今年已繳納稅費剛好完美等於持有天數的負擔額，無需向政府補繳，政府亦無退稅款。`;
+        }
+      }
+
+      // 6. 繳納狀態字樣呈現
+      document.getElementById('rowLicenseStatus').innerHTML = state.licensePaid 
+        ? `<span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-semibold bg-emerald-100 text-emerald-800">已先繳清</span>`
+        : `<span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-semibold bg-amber-100 text-amber-800">未預繳</span>`;
+
+      document.getElementById('rowFuelStatus').innerHTML = state.fuelPaid 
+        ? `<span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-semibold bg-emerald-100 text-emerald-800">已先繳清</span>`
+        : `<span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-semibold bg-amber-100 text-amber-800">未預繳</span>`;
+
+      // 7. 生成分享對帳格式
+      const carTypeName = state.type === 'passenger' ? '自用小客車' : '自用小貨車';
+      const fuelTypeName = state.fuelType === 'gas' ? '汽油' : '柴油';
+      
+      let shareText = "";
+      if (state.purpose === 'transfer') {
+        shareText = `🚗【${year}年度 車輛過戶稅金拆帳明細】🚗
+----------------------------------
+■ 車輛規格：${carTypeName} (級距: ${taxDatabase[state.type][state.selectedCcIndex].label} - ${fuelTypeName})
+■ 過戶切分日：${year}年${mm}月${dd}日
+
+■ 天數分攤比（全年度 ${totalDays} 天）：
+  - 舊車主持有：${sellerDays} 天 (01/01 ~ ${mm}/${dd}) -> 佔 ${(sellerDays/totalDays*100).toFixed(1)}%
+  - 新車主持有：${buyerDays} 天 (${nMm}/${nDd} ~ 12/31) -> 佔 ${(buyerDays/totalDays*100).toFixed(1)}%
+
+■ 稅目年額：
+  - 牌照稅年額：NT$ ${formatMoney(annualLicense)}
+  - 燃料稅年額：NT$ ${formatMoney(annualFuel)}
+
+■ 雙方法理「按日比例」應自付金額：
+  - 舊車主應負擔：牌照 NT$ ${formatMoney(sellerLicenseShare)} + 燃料 NT$ ${formatMoney(sellerFuelShare)} = NT$ ${formatMoney(fairTotalSellerVal)}
+  - 新車主應負擔：牌照 NT$ ${formatMoney(buyerLicenseShare)} + 燃料 NT$ ${formatMoney(buyerFuelShare)} = NT$ ${formatMoney(fairTotalBuyerVal)}
+
+■ 監理站過戶實務（全年度強制清償）：
+  - 舊車主過戶前已繳：NT$ ${formatMoney(sellerPrepaid)}
+  - 過戶現場臨櫃補繳：NT$ ${formatMoney(dmvTotal)} (由 ${state.counterPayer === 'seller' ? '舊車主' : '新車主'} 在櫃檯付款)
+
+==================================
+📢【最終私下現金結算方案】📢
+👉 ${netBuyerOwesSeller > 0 ? `新車主應現金支付（退還）給舊車主：NT$ ${formatMoney(netBuyerOwesSeller)} 元` : `舊車主應現金支付（退還）給新車主：NT$ ${formatMoney(Math.abs(netBuyerOwesSeller))} 元`}
+----------------------------------
+`;
+      } else {
+        const netSuspensionDiff = sellerPrepaid - fairTotalSellerVal;
+        shareText = `📋【${year}年度 車輛停牌/報廢稅金退補明細】📋
+----------------------------------
+■ 車輛規格：${carTypeName} (級距: ${taxDatabase[state.type][state.selectedCcIndex].label} - ${fuelTypeName})
+■ 辦理停牌日：${year}年${mm}月${dd}日
+
+■ 天數分攤（全年度 ${totalDays} 天）：
+  - 法定持有天數：${sellerDays} 天 (01/01 ~ ${mm}/${dd})
+  - 停牌免稅天數：${buyerDays} 天 (${nMm}/${nDd} ~ 12/31)
+
+■ 稅目年額：
+  - 牌照稅年額：NT$ ${formatMoney(annualLicense)}
+  - 燃料稅年額：NT$ ${formatMoney(annualFuel)}
+
+■ 車主法定「按日分攤」應自付額 (持有天數)：
+  - 牌照稅法定負擔：NT$ ${formatMoney(sellerLicenseShare)}
+  - 燃料稅法定負擔：NT$ ${formatMoney(sellerFuelShare)}
+  - 法定應自付總額：NT$ ${formatMoney(fairTotalSellerVal)}
+
+■ 車主年度已向政府繳納狀況：
+  - 牌照稅已繳：NT$ ${state.licensePaid ? formatMoney(annualLicense) : 0}
+  - 燃料稅已繳：NT$ ${state.fuelPaid ? formatMoney(annualFuel) : 0}
+  - 年度已繳納總額：NT$ ${formatMoney(sellerPrepaid)}
+
+==================================
+📢【停牌辦理後退補清算結論】📢
+👉 ${netSuspensionDiff > 0 ? `【政府退稅】政府應向車主退還溢繳稅金：NT$ ${formatMoney(netSuspensionDiff)} 元` : `【櫃檯補繳】車主臨櫃應向政府補繳稅金：NT$ ${formatMoney(Math.abs(netSuspensionDiff))} 元`}
+----------------------------------
+* 車主可持監理所開立之「停牌/報廢證明書」與「退稅申請書」向稅捐處及監理所辦理溢繳天數退稅。
+;
+      }
+
+      document.getElementById('outputSummary').value = shareText;
+    }
+
+    // 格式化千分位
+    function formatMoney(num) {
+      return num.toLocaleString('zh-TW');
+    }
+
+    // 提示訊息 (Toast) 控制
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      const toastMsg = document.getElementById('toastMsg');
+      toastMsg.innerText = msg;
+      
+      toast.className = "fixed bottom-6 right-6 bg-slate-900 text-slate-100 text-sm py-3 px-5 rounded-xl shadow-lg flex items-center gap-2 transform translate-y-0 opacity-100 transition-all duration-300 z-50";
+      
+      setTimeout(() => {
+        toast.className = "fixed bottom-6 right-6 bg-slate-900 text-slate-100 text-sm py-3 px-5 rounded-xl shadow-lg flex items-center gap-2 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none z-50";
+      }, 3000);
+    }
+  </script>
+</body>
+</html>
